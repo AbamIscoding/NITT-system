@@ -1,0 +1,101 @@
+<x-layouts.app>
+    <div class="max-w-3xl mx-auto py-8">
+        <h1 class="text-2xl font-bold mb-4">Invoice #{{ $invoice->id }}</h1>
+
+        {{-- Basic details --}}
+        <div class="mb-6 space-y-1 text-m">
+            <p><strong>Lead Guest: </strong> {{ $invoice->lead_guest_name }}</p>
+            <p><strong>Email: </strong> {{ $invoice->email }}</p>
+            <p><strong>PAX: </strong> {{ $invoice->number_of_pax }}</p>
+            <p><strong>Tour Package: </strong> {{ $invoice->tour_package }}</p>
+            <p><strong>Hotel: </strong> {{ $invoice->hotel_accommodation }}</p>
+            <p>
+                <strong>Arrival: </strong>
+                {{ $invoice->arrival_date ? \Carbon\Carbon::parse($invoice->arrival_date)->format('F d, Y') : '—' }}
+            </p>
+            <p>
+                <strong>Departure: </strong>
+                {{ $invoice->departure_date ? \Carbon\Carbon::parse($invoice->departure_date)->format('F d, Y') : '—' }}
+            </p>
+        </div>
+
+        {{-- Guest breakdown --}}
+        <h2 class="text-lg font-semibold mb-2">Guest Breakdown</h2>
+
+        <table class="w-full text-sm border mb-6">
+            <thead>
+                <tr class="bg-gray-400">
+                    <th class="p-2 border text-left">Type</th>
+                    <th class="p-2 border text-right">Count</th>
+                    <th class="p-2 border text-right">Rate per Person</th>
+                    <th class="p-2 border text-right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php
+                    $adultSubtotal  = $invoice->adult_count  * $invoice->adult_rate;
+                    $infantSubtotal = $invoice->infant_count * $invoice->infant_rate;
+                    $seniorSubtotal = $invoice->senior_count * $invoice->senior_rate;
+                @endphp
+
+                @if ($invoice->adult_count > 0)
+                    <tr>
+                        <td class="p-2 border">Adult</td>
+                        <td class="p-2 border text-right">{{ $invoice->adult_count }}</td>
+                        <td class="p-2 border text-right">
+                            ₱{{ number_format($invoice->adult_rate) }}
+                        </td>
+                        <td class="p-2 border text-right">
+                            ₱{{ number_format($adultSubtotal) }}
+                        </td>
+                    </tr>
+                @endif
+
+                @if ($invoice->infant_count > 0)
+                    <tr>
+                        <td class="p-2 border">Infant</td>
+                        <td class="p-2 border text-right">{{ $invoice->infant_count }}</td>
+                        <td class="p-2 border text-right">
+                            ₱{{ number_format($invoice->infant_rate) }}
+                        </td>
+                        <td class="p-2 border text-right">
+                            ₱{{ number_format($infantSubtotal) }}
+                        </td>
+                    </tr>
+                @endif
+
+                @if ($invoice->senior_count > 0)
+                    <tr>
+                        <td class="p-2 border">Senior / PWD</td>
+                        <td class="p-2 border text-right">{{ $invoice->senior_count }}</td>
+                        <td class="p-2 border text-right">
+                            ₱{{ number_format($invoice->senior_rate) }}
+                        </td>
+                        <td class="p-2 border text-right">
+                            ₱{{ number_format($seniorSubtotal) }}
+                        </td>
+                    </tr>
+                @endif
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray-500">
+                    <th class="p-2 border text-left" colspan="3">Total</th>
+                    <th class="p-2 border text-right">
+                        ₱{{ number_format($invoice->total_amount) }}
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+
+        {{-- Totals summary --}}
+        <div class="mb-4 text-sm">
+            <p><strong>Total:</strong> ₱{{ number_format($invoice->total_amount, 2) }}</p>
+            <p><strong>Balance:</strong> ₱{{ number_format($invoice->balance, 2) }}</p>
+            <p><strong>Status:</strong> {{ ucfirst($invoice->status) }}</p>
+        </div>
+
+        <a href="{{ route('invoices.index') }}" class="mt-4 inline-block text-blue-600 underline">
+            ← Back to invoices
+        </a>
+    </div>
+</x-layouts.app>
