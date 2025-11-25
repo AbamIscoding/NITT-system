@@ -1,5 +1,16 @@
 <x-layouts.app>
     <div class="max-w-3xl mx-auto py-8">
+        <a href="{{ route('invoices.index') }}"
+            id="back-button"
+            class="inline-flex items-center gap-1 text-blue-600 hover:underline mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg"
+                fill="none" viewBox="0 0 24 24"
+                stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M10.5 6 4.5 12m0 0 6 6m-6-6h15" />
+            </svg>
+            Back
+        </a>
         <h1 class="text-2xl font-bold mb-6">Create Invoice</h1>
 
         @if(session('success'))
@@ -18,7 +29,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('invoices.store') }}">
+        <form id="invoice-form" method="POST" action="{{ route('invoices.store') }}">
             @csrf
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -218,5 +229,105 @@
                     // Run once on page load to initialize with default values
                     document.addEventListener('DOMContentLoaded', recalcTotals);
                 </script>
+                <div id="unsaved-modal"
+                    class="fixed inset-0 bg-black/40 flex items-center justify-center z-50 hidden">
+                    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-4">
+                        <h2 class="text-lg font-semibold mb-2">Discard changes?</h2>
+                        <p class="text-sm text-gray-600 mb-4">
+                            You have unsaved changes. Are you sure you want to leave this page?
+                        </p>
+                        <div class="flex justify-end gap-2">
+                            <button id="cancel-leave"
+                                    class="px-3 py-1 text-sm rounded border bg-blue-600 border-gray-500">
+                                Stay
+                            </button>
+                            <button id="confirm-leave"
+                                    class="px-3 py-1 text-sm rounded bg-red-600 text-white">
+                                Leave without saving
+                            </button>
+                        </div>
+                    </div>
+                </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('invoice-form');
+            if (!form) return;
+
+            const inputs = form.querySelectorAll('input, textarea, select');
+            const backButton = document.getElementById('back-button');
+            const modal = document.getElementById('unsaved-modal');
+            const cancelLeave = document.getElementById('cancel-leave');
+            const confirmLeave = document.getElementById('confirm-leave');
+
+            let isDirty = false;
+            let pendingHref = null;
+
+            // As soon as ANY visible field is touched, mark as dirty
+            inputs.forEach(el => {
+                if (el.type === 'hidden') return;
+
+                el.addEventListener('input', function () {
+                    isDirty = true;
+                });
+
+                el.addEventListener('change', function () {
+                    isDirty = true;
+                });
+            });
+
+            // If form is submitted, do NOT block navigation
+            form.addEventListener('submit', function () {
+                isDirty = false;
+            });
+
+            function openModal() {
+                if (!modal) return;
+                modal.classList.remove('hidden');
+            }
+
+            function closeModal() {
+                if (!modal) return;
+                modal.classList.add('hidden');
+            }
+
+            // Handle Back button click
+            if (backButton) {
+                backButton.addEventListener('click', function (e) {
+                    if (!isDirty) return; // if clean, allow normal back
+                    e.preventDefault();
+                    pendingHref = backButton.href;
+                    openModal();
+                });
+            }
+
+            if (cancelLeave) {
+                cancelLeave.addEventListener('click', function () {
+                    pendingHref = null;
+                    closeModal();
+                });
+            }
+
+            if (confirmLeave) {
+                confirmLeave.addEventListener('click', function () {
+                    const href = pendingHref;
+                    pendingHref = null;
+                    isDirty = false;
+                    closeModal();
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+            }
+
+            // Warn on tab close / reload if dirty
+            window.addEventListener('beforeunload', function (e) {
+                if (!isDirty) return;
+                e.preventDefault();
+                e.returnValue = '';
+            });
+        });
+    </script>
+
+
 </x-layouts.app>

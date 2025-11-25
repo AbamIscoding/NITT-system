@@ -1,11 +1,36 @@
 <x-layouts.app>
     <div class="max-w-5xl mx-auto py-8">
-        <h1 class="text-2xl font-bold mb-6">Invoices</h1>
+        <div class="flex items-center justify-between mb-4">
+            <h1 class="text-2xl font-bold">Invoices</h1>
 
-        <a href="{{ route('invoices.create') }}"
-           class="mb-4 inline-block px-4 py-2 bg-blue-600 text-white rounded">
-            + New Invoice
-        </a>
+            <a href="{{ route('invoices.create') }}"
+               class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+                + New Invoice
+            </a>
+        </div>
+
+        <form method="GET" action="{{ route('invoices.index') }}" class="mb-4 flex flex-wrap gap-3 items-end">
+            <div>
+                <label class="block text-xs font-semibold mb-1">Lead Guest / Email / Package</label>
+                <input type="text"
+                       name="search"
+                       value="{{ $search ?? '' }}"
+                       class="border rounded px-2 py-1 text-s w-56"
+                       placeholder="Search keyword...">
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="px-3 py-2 bg-blue-600 text-white text-sm rounded">
+                    Search
+                </button>
+
+                <a href="{{ route('invoices.index') }}"
+                   class="px-3 py-2 bg-gray-200 text-sm rounded">
+                    Clear
+                </a>
+            </div>
+        </form>
 
         <table class="w-full border text-sm">
             <thead>

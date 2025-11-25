@@ -115,12 +115,30 @@ class InvoiceController extends Controller
             ->with('success', 'Invoice created and schedule added!');
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        $invoices = Invoice::latest()->paginate(10);
+        $query = Invoice::query();
 
-        return view('invoices.index', compact('invoices'));
+        $search = $request->input('search');
+        $pax = $request->input('pax');
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('lead_guest_name', 'like', '%' . $search . '%')
+                ->orWhere('email', 'like', '%' . $search . '%')
+                ->orWhere('tour_package', 'like', '%' . $search . '%');
+            });
+        }
+
+        if ($pax !== null && $pax !== '') {
+            $query->where('number_of_pax', $pax);
+        }
+
+        $invoices = $query->latest()->paginate(10)->withQueryString();
+
+        return view('invoices.index', compact('invoices', 'search', 'pax'));
     }
+
 
     public function show(Invoice $invoice)
     {
