@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\InvoiceLog;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ActivityLogController extends Controller
@@ -10,7 +11,7 @@ class ActivityLogController extends Controller
     public function index()
     {
         if (! Auth::user()->is_admin) {
-            abort(403); // forbid non-admins
+            abort(403);
         }
 
         $logs = InvoiceLog::with(['invoice', 'user'])
