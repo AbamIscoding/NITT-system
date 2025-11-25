@@ -26,28 +26,42 @@
             </a>
         </div>
 
-        {{-- Day filter within current month --}}
-        <form method="GET" action="{{ route('schedules.index') }}" class="flex items-end gap-2 mb-6">
-            <input type="hidden" name="month" value="{{ $month }}">
-            <input type="hidden" name="year" value="{{ $year }}">
+        {{-- add an search bar here for searching of dates and name --}}
+        <form method="GET" action="{{ route('schedules.index') }}" class="mb-4 flex flex-wrap gap-3 items-end">
+            <input type="hidden" name="month" value="{{ $current->month }}">
+            <input type="hidden" name="year" value="{{ $current->year }}">
 
             <div>
-                <label class="block text-sm font-medium mb-1">Select a Day</label>
-                <select name="day" class="border rounded p-1 bg-gray-500 text-sm">
-                    <option value="">All days</option>
-                    @for ($d = 1; $d <= $current->daysInMonth; $d++)
-                        <option value="{{ $d }}" {{ (int)($day ?? 0) === $d ? 'selected' : '' }}>
-                            {{ $d }}
-                        </option>
-                    @endfor
-                </select>
+                <label class="block text-xs font-semibold mb-1">Name / Hotel / Tour</label>
+                <input type="text"
+                    name="search"
+                    value="{{ $search ?? request('search') }}"
+                    class="border rounded px-2 py-1 text-sm w-56"
+                    placeholder="Search keyword...">
             </div>
 
-            <button type="submit" class="px-3 py-1 border rounded text-sm">
-                Search
-            </button>
+            <div>
+                <label class="block text-xs font-semibold mb-1">Arrival Date</label>
+                <input type="date"
+                    name="date"
+                    value="{{ $date ?? request('date') }}"
+                    class="border rounded px-2 py-1 text-sm">
+            </div>
+
+            <div class="flex gap-2">
+                <button type="submit"
+                        class="px-3 py-2 bg-blue-600 text-white text-sm rounded">
+                    Search
+                </button>
+
+                <a href="{{ route('schedules.index', ['month' => $current->month, 'year' => $current->year]) }}"
+                class="px-3 py-2 bg-gray-200 text-sm rounded">
+                    Clear
+                </a>
+            </div>
         </form>
 
+        {{-- Schedules table --}}
         @if ($schedules->isEmpty())
             <p>No arrivals scheduled for this selection.</p>
         @else

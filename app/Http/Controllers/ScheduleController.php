@@ -5,38 +5,50 @@ namespace App\Http\Controllers;
 use App\Models\Schedule;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class ScheduleController extends Controller
 {
      public function index(Request $request)
     {
-        // current month/year as default
-        // defaults
-        $year  = (int) $request->query('year', now()->year);
-        $month = (int) $request->query('month', now()->month);
-        $day   = $request->query('day'); // optional
+        $month = $request->input('month');
+        $year  = $request->input('year');
 
-        $query = Schedule::whereYear('arrival_date', $year)
-            ->whereMonth('arrival_date', $month)
-            ->with('invoice')        // so we can link to invoice without extra queries
-            ->orderBy('arrival_date')
-            ->orderBy('name');
-
-        if (!empty($day)) {
-            $query->whereDay('arrival_date', (int) $day);
+        if ($month && $year) {
+            $current = Carbon::createFromDate($year, $month, 1);
+        } else {
+            $current = Carbon::now()->startOfMonth();
         }
 
-        $schedules = $query->get();
+        $startOfMonth = $current->copy()->startOfMonth();
+        $endOfMonth   = $current->copy()->endOfMonth();
 
-        $current = \Illuminate\Support\Carbon::create($year, $month, 1);
+        $search = $request->input('search');
+        $date   = $request->input('date');
+
+        $query = Schedule::query()->with('invoice');
+
+        if ($date) {
+            $query->whereDate('arrival_date', $date);
+        } else {
+            $query->whereBetween('arrival_date', [$startOfMonth, $endOfMonth]);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                ->orWhere('hotel_accommodation', 'like', '%' . $search . '%')
+                ->orWhere('tours', 'like', '%' . $search . '%');
+            });
+        }
+
+        $schedules = $query->orderBy('arrival_date')->get();
 
         return view('schedules.index', [
             'schedules' => $schedules,
             'current'   => $current,
-            'year'      => $year,
-            'month'     => $month,
-            'day'       => $day,
+            'search'    => $search,
+            'date'      => $date,
         ]);
     }
 }
