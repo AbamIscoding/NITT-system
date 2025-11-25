@@ -2,7 +2,6 @@
     <div class="max-w-3xl mx-auto py-8">
         <h1 class="text-2xl font-bold mb-4">Invoice #{{ $invoice->id }}</h1>
 
-        {{-- Basic details --}}
         <div class="mb-6 space-y-1 text-m">
             <p><strong>Lead Guest: </strong> {{ $invoice->lead_guest_name }}</p>
             <p><strong>Email: </strong> {{ $invoice->email }}</p>
@@ -87,11 +86,26 @@
             </tfoot>
         </table>
 
-        {{-- Totals summary --}}
         <div class="mb-4 text-sm">
             <p><strong>Total:</strong> ₱{{ number_format($invoice->total_amount, 2) }}</p>
             <p><strong>Balance:</strong> ₱{{ number_format($invoice->balance, 2) }}</p>
-            <p><strong>Status:</strong> {{ ucfirst($invoice->status) }}</p>
+
+            <form method="POST" action="{{ route('invoices.updateStatus', $invoice) }}" class="mt-2 flex items-center gap-2">
+                @csrf
+                @method('PATCH')
+
+                <label class="text-sm font-semibold">Status:</label>
+
+                <select name="status" class="border rounded p-1 text-sm">
+                    <option value="pending"   @selected($invoice->status === 'pending')>Pending</option>
+                    <option value="paid"      @selected($invoice->status === 'paid')>Paid</option>
+                    <option value="cancelled" @selected($invoice->status === 'cancelled')>Cancelled</option>
+                </select>
+
+                <button type="submit" class="px-3 py-1 bg-blue-600 text-white text-xs rounded">
+                    Update
+                </button>
+            </form>
         </div>
 
         <a href="{{ route('invoices.index') }}" class="mt-4 inline-block text-blue-600 underline">

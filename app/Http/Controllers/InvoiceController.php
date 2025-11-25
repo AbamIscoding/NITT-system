@@ -204,16 +204,6 @@ class InvoiceController extends Controller
             ->route('invoices.show', $invoice)
             ->with('success', 'Invoice updated successfully.');
     }
-    // public function send(Invoice $invoice)
-    // {
-    //     // you could add checks here (e.g. if already sent, etc.)
-
-    //     Mail::to($invoice->email)->send(new InvoiceMail($invoice));
-
-    //     return redirect()
-    //         ->route('invoices.show', $invoice)
-    //         ->with('success', 'Invoice emailed to client.');
-    // }
     public function send(Invoice $invoice)
     {
         // Debug check (optional while testing)
@@ -225,5 +215,18 @@ class InvoiceController extends Controller
             ->route('invoices.show', $invoice)
             ->with('success', 'Invoice emailed to client.');
     }
+    public function updateStatus(Request $request, Invoice $invoice)
+    {
+        $data = $request->validate([
+            'status' => ['required', 'in:confirmed,paid,cancelled'],
+        ]);
+
+        $invoice->update([
+            'status' => $data['status'],
+        ]);
+
+        return back()->with('success', 'Invoice status updated.');
+    }
+
 
 }
