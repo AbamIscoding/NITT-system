@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
@@ -68,4 +69,7 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/invoices/{invoice}/status', [InvoiceController::class, 'updateStatus'])->name('invoices.updateStatus');
 
     Route::get('/schedules', [ScheduleController::class, 'index'])->name('schedules.index');
+
+    Route::get('/logs', [ActivityLogController::class, 'index'])
+        ->name('logs.index');
 });

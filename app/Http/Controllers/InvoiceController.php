@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InvoiceLog;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Invoice;
 use App\Models\Schedule;
 use Illuminate\Http\Request;
@@ -88,6 +90,15 @@ class InvoiceController extends Controller
             'date_issued'         => now()->toDateString(),
         ]);
 
+        // LOG INVOICE CREATION
+        InvoiceLog::create([
+            'invoice_id' => $invoice->id,
+            'user_id'    => Auth::id(),
+            'action'     => 'invoice_created',
+            'old_status' => null,
+            'new_status' => $invoice->status, // pending
+            'note'       => 'Invoice created',
+        ]);
         // create linked schedule row
         $invoice->schedule()->create([
             'name'                => $invoice->lead_guest_name,
@@ -113,6 +124,7 @@ class InvoiceController extends Controller
 
     public function show(Invoice $invoice)
     {
+        $invoice->load(['logs.user']);
         return view('invoices.show', compact('invoice'));
     }
 
@@ -218,15 +230,27 @@ class InvoiceController extends Controller
     public function updateStatus(Request $request, Invoice $invoice)
     {
         $data = $request->validate([
-            'status' => ['required', 'in:confirmed,paid,cancelled'],
+            'status' => ['required', 'in:pending,confirmed,paid,cancelled'],
         ]);
 
-        $invoice->update([
-            'status' => $data['status'],
-        ]);
+        $oldStatus = $invoice->status;
+        $newStatus = $data['status'];
+
+        if ($oldStatus !== $newStatus) {
+            $invoice->update([
+                'status' => $newStatus,
+            ]);
+
+            InvoiceLog::create([
+                'invoice_id' => $invoice->id,
+                'user_id' => Auth::id(),
+                'action' => 'status_updated',
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'note' => null,
+            ]);
+        }
 
         return back()->with('success', 'Invoice status updated.');
     }
-
-
 }

@@ -107,6 +107,48 @@
                 </button>
             </form>
         </div>
+            @if(auth()->check() && auth()->user()->is_admin)
+                <div class="mt-8">
+                    <h2 class="text-lg font-semibold mb-2">Audit Logs</h2>
+
+                    @if ($invoice->logs->isEmpty())
+                        <p class="text-sm text-gray-500">No activity recorded yet.</p>
+                    @else
+                        <table class="w-full text-sm border">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="p-2 border text-left">Date</th>
+                                    <th class="p-2 border text-left">User</th>
+                                    <th class="p-2 border text-left">Action</th>
+                                    <th class="p-2 border text-left">Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($invoice->logs as $log)
+                                    <tr>
+                                        <td class="p-2 border">
+                                            {{ $log->created_at->format('M d, Y H:i') }}
+                                        </td>
+                                        <td class="p-2 border">
+                                            {{ $log->user?->name ?? 'System' }}
+                                        </td>
+                                        <td class="p-2 border">
+                                            {{ str_replace('_', ' ', ucfirst($log->action)) }}
+                                        </td>
+                                        <td class="p-2 border">
+                                            @if($log->action === 'status_updated')
+                                                Status: {{ ucfirst($log->old_status) }} → {{ ucfirst($log->new_status) }}
+                                            @else
+                                                {{ $log->note ?? '—' }}
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @endif
+                </div>
+            @endif
 
         <a href="{{ route('invoices.index') }}" class="mt-4 inline-block text-blue-600 underline">
             ← Back to invoices
