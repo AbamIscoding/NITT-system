@@ -40,14 +40,6 @@
                     placeholder="Search keyword...">
             </div>
 
-            <div>
-                <label class="block text-xs font-semibold mb-1">Arrival Date</label>
-                <input type="date"
-                    name="date"
-                    value="{{ $date ?? request('date') }}"
-                    class="border rounded px-2 py-1 text-sm">
-            </div>
-
             <div class="flex gap-2">
                 <button type="submit"
                         class="px-3 py-2 bg-blue-600 text-white text-sm rounded">
