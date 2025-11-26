@@ -328,6 +328,4 @@
             });
         });
     </script>
-
-
 </x-layouts.app>
