@@ -7,7 +7,7 @@
         @else
             <table class="w-full text-sm border">
                 <thead>
-                    <tr class="bg-gray-200">
+                    <tr class="bg-gray-500">
                         <th class="p-2 border text-left">Date</th>
                         <th class="p-2 border text-left">User</th>
                         <th class="p-2 border text-left">Action</th>
