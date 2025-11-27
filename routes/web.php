@@ -6,13 +6,18 @@ use App\Http\Controllers\ScheduleController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use Livewire\Volt\Volt;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Schedule;
 use Carbon\Carbon;
 use App\Models\Invoice;
-
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 Route::get('/', function () {
-    return view('welcome');
+    if (Auth::check()) {
+        return redirect()->route('dashboard');
+    }
+
+    return redirect()->route('login');
 })->name('home');
 
 Route::get('/dashboard', function () {
@@ -132,4 +137,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/logs', [ActivityLogController::class, 'index'])
         ->name('logs.index');
+
+    Route::get('/register', [RegisteredUserController::class, 'create'])
+        ->middleware('can:create-users')
+        ->name('register');
+
+    Route::post('/register', [RegisteredUserController::class, 'store'])
+        ->middleware('can:create-users');
 });
+

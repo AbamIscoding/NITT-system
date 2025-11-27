@@ -51,7 +51,7 @@
         {{-- Pie chart: status breakdown this month --}}
         <div class="border rounded-xl p-4 bg-white dark:bg-zinc-800 shadow">
             <h2 class="font-bold text-lg mb-2">Status This Month</h2>
-            <p class="text-xs text-gray-500 mb-2">Paid, pending, cancelled, confirmed</p>
+            <p class="text-xs text-gray-500 mb-2">Paid, pending, cancelled</p>
             <div class="mt-2 h-52">
                 <canvas id="statusPieChart" class="w-full h-full"></canvas>
             </div>
@@ -222,15 +222,15 @@
         const statusPaid = {{ $statusPaid }};
         const statusPending = {{ $statusPending }};
         const statusCancelled = {{ $statusCancelled }};
-        const statusConfirmed = {{ $statusConfirmed }};
+
 
         if (statusCanvas && typeof Chart !== 'undefined') {
             new Chart(statusCanvas, {
                 type: 'pie',
                 data: {
-                    labels: ['Paid', 'Pending', 'Cancelled', 'Confirmed'],
+                    labels: ['Paid', 'Pending', 'Cancelled'],
                     datasets: [{
-                        data: [statusPaid, statusPending, statusCancelled, statusConfirmed],
+                        data: [statusPaid, statusPending, statusCancelled],
                     }]
                 },
                 options: {
