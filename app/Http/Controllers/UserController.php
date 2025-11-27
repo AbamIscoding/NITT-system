@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -40,4 +41,21 @@ class UserController extends Controller
             ->route('users.index')
             ->with('success', 'User account created successfully.');
     }
+
+    public function toggleActive(User $user)
+    {
+        if (Auth::id() === $user->id) {
+            return redirect()
+                ->route('users.index')
+                ->with('error', 'You cannot disable your own account.');
+        }
+
+        $user->is_active = ! $user->is_active;
+        $user->save();
+
+        return redirect()
+            ->route('users.index')
+            ->with('success', $user->is_active ? 'User enabled.' : 'User disabled.');
+    }
+
 }

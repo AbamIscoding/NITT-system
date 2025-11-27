@@ -1,3 +1,4 @@
+{{-- This file is not being use ask the admin why --}}
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
