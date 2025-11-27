@@ -48,6 +48,16 @@
                             </flux:navlist.item>
                         @endif
                     @endauth
+
+                    @if(auth()->user()?->is_admin)
+                        <flux:navlist.item
+                                        icon="users"
+                                        :href="route('users.index')"
+                                        :current="request()->routeIs('users.*')"
+                                        wire:navigate>
+                            {{ __('Users') }}
+                        </flux:navlist.item>
+                    @endif
                 </flux:navlist.group>
             </flux:navlist>
 

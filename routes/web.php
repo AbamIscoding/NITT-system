@@ -11,6 +11,7 @@ use App\Models\Schedule;
 use Carbon\Carbon;
 use App\Models\Invoice;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     if (Auth::check()) {
@@ -144,5 +145,12 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/register', [RegisteredUserController::class, 'store'])
         ->middleware('can:create-users');
+});
+
+
+Route::middleware(['auth', 'can:manage-users'])->group(function () {
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
 });
 
