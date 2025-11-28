@@ -18,8 +18,12 @@ Route::get('/', function () {
         return redirect()->route('dashboard');
     }
 
-    return redirect()->route('login');
+    return redirect()->route('landing');
 })->name('home');
+
+Route::get('/landing', function() {
+    return view('Landing.landing');
+})->name('landing');
 
 Route::get('/dashboard', function () {
     $today = Carbon::today();
