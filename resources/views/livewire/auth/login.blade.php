@@ -1,6 +1,24 @@
 <x-layouts.auth>
-    <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+    <div class="flex flex-col gap-2 max-w-md w-full">
+
+        {{-- Brand + Title --}}
+        <div class="space-y-2 text-center">
+            {{-- already added in the simple.blade.php
+            div class="flex justify-center">
+                <img src="{{ asset('images/logo.png') }}"
+                    alt="Northern Island Logo"
+                    class="h-40 w-auto rounded-lg shadow-sm">
+            </div> --}}
+
+            <div>
+                <h1 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                    Northern Island Staff Login
+                </h1>
+                <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-200">
+                    Internal booking &amp; invoicing portal for Northern Island Travel &amp; Tours.
+                </p>
+            </div>
+        </div>
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
@@ -16,7 +34,7 @@
                 required
                 autofocus
                 autocomplete="email"
-                placeholder="email@example.com"
+                placeholder="you@northern-island.com"
             />
 
             <!-- Password -->
@@ -48,11 +66,10 @@
             </div>
         </form>
 
-        @if (Route::has('register'))
-            <div class="space-x-1 text-sm text-center rtl:space-x-reverse text-zinc-600 dark:text-zinc-400">
-                <span>{{ __('Don\'t have an account?') }}</span>
-                <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
-            </div>
-        @endif
+        {{-- Instead of public Sign up, show admin note --}}
+        <div class="mt-1 text-[12px] text-center text-zinc-600 dark:text-zinc-100">
+            Accounts are created by the system administrator. If you need access,
+            please coordinate with Northern Island management.
+        </div>
     </div>
 </x-layouts.auth>
