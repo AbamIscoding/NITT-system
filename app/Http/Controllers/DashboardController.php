@@ -37,10 +37,10 @@ class DashboardController extends Controller
             ->get();
 
         // --- Quota ---
-        $monthlyQuota = 20;
+        $monthlyQuota = 30;
 
-        $closedPaxThisMonth = Invoice::whereBetween('arrival_date', [$startOfMonth, $endOfMonth])
-            ->whereIn('status', ['confirmed', 'paid'])
+        $closedPaxThisMonth = Invoice::whereBetween('date_issued', [$startOfMonth, $endOfMonth])
+            ->whereIn('status', ['confirmed', 'paid'])   // treat these as “closed”
             ->sum('number_of_pax');
 
         $quotaRemaining = max($monthlyQuota - $closedPaxThisMonth, 0);
