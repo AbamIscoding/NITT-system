@@ -47,33 +47,46 @@
         {{-- Monthly Quota --}}
         <div class="border border-slate-200 dark:border-slate-700 rounded-xl p-4
                     bg-white dark:bg-slate-900/80 shadow-sm flex flex-col justify-between">
-            <div>
-                <h2 class="font-semibold text-sm text-slate-900 dark:text-slate-50 mb-1">Monthly Quota</h2>
-                <p class="text-[11px] text-slate-500 dark:text-slate-300 mb-3">
-                    Target vs closed bookings for the current month.
-                </p>
 
-                <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
-                    <p>Target: <span class="font-semibold">{{ $monthlyQuota }}</span> PAX</p>
-                    <p>Closed this month: <span class="font-semibold">{{ $closedPaxThisMonth }}</span> PAX</p>
-                    <p>Remaining: <span class="font-semibold">{{ $quotaRemaining }}</span> PAX</p>
+            <div class="flex items-start gap-4">
+                {{-- Tiny doughnut chart --}}
+
+
+                {{-- Text --}}
+                <div class="flex-1">
+                    <h2 class="font-semibold text-sm text-slate-900 dark:text-slate-50 mb-1">Monthly Quota</h2>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-300 mb-3">
+                        Target vs closed bookings for the current month.
+                    </p>
+
+                    <div class="space-y-1.5 text-xs text-slate-700 dark:text-slate-200">
+                        <p>Target: <span class="font-semibold">{{ $monthlyQuota }}</span> PAX</p>
+                        {{-- <p>Closed this month: <span class="font-semibold">{{ $closedPaxThisMonth }}</span> PAX</p>
+                        <p>Remaining: <span class="font-semibold">{{ $quotaRemaining }}</span> PAX</p> --}}
+                    </div>
                 </div>
+            </div>
+
+            <div class="w-33 h-33 mx-auto mt-2">
+                    <canvas id="quotaChart" class="w-full h-full"></canvas>
             </div>
 
             <div class="mt-4">
                 @if($quotaReached)
-                    <span class="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-[11px] font-medium
+                    <span class="inline-flex items-center rounded-full bg-emerald-50 text-white-700 px-3 py-1 text-[11px] font-medium
                                 dark:bg-emerald-900/40 dark:text-emerald-200">
                         🎉 Quota reached – amazing work!
                     </span>
                 @else
-                    <span class="inline-flex items-center rounded-full bg-amber-50 text-amber-800 px-3 py-1 text-[11px] font-medium
+                    <span class="inline-flex items-center rounded-full bg-amber-50 text-white-800 px-3 py-1 text-[11px] font-medium
                                 dark:bg-amber-900/40 dark:text-amber-200">
                         Keep going — {{ $quotaRemaining }} PAX to go
                     </span>
                 @endif
             </div>
         </div>
+
+
 
         {{-- Bar chart: invoices sent vs paid by month --}}
         <div class="border border-slate-200 dark:border-slate-700 rounded-xl p-4
@@ -237,6 +250,7 @@
             const invoicesCanvas      = document.getElementById('invoicesByMonthChart');
             const statusCanvas        = document.getElementById('statusPieChart');
             const monthlyIncomeCanvas = document.getElementById('monthlyIncomeChart');
+            const quotaCanvas         = document.getElementById('quotaChart');
 
             // Invoices by month
             const labels   = @json($invoicesByMonthLabels);
@@ -325,6 +339,49 @@
                     });
                 }
             @endif
+
+            // Monthly quota doughnut
+            if (quotaCanvas && typeof Chart !== 'undefined') {
+                const closed    = {{ $closedPaxThisMonth }};
+                const remaining = {{ $quotaRemaining }};
+
+                new Chart(quotaCanvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Closed', 'Remaining'],
+                        datasets: [{
+                            data: [closed, remaining],
+                            backgroundColor: [
+                                'rgba(56, 189, 248, 0.9)',  // Closed
+                                'rgba(248, 113, 113, 0.9)',    // Remaining
+                            ],
+                            borderWidth: 0,
+                        }],
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '65%',
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    boxWidth: 10,
+                                    font: { size: 10 },
+                                },
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label(context) {
+                                        const value = context.parsed;
+                                        return `${context.label}: ${value} PAX`;
+                                    },
+                                },
+                            },
+                        },
+                    },
+                });
+            }
 
             // Status pie chart
             const statusPaid      = {{ $statusPaid }};
