@@ -11,11 +11,12 @@
         $monthlyIncomeRemaining = $monthlyIncomeRemaining ?? [];
     @endphp
 
+
     {{-- Header / Sea vibe --}}
     <div class="mb-6 flex items-center justify-between gap-3">
         <div>
             <span class="inline-flex items-center rounded-full px-3 py-1 text-[14px] font-medium
-                          bg-sky-100 text-sky-800
+                          bg-sky-200 text-sky-800
                           dark:bg-sky-900/40 dark:text-sky-200">
                 Northern Island Travel &amp; Tours • Operations
             </span>

@@ -94,7 +94,7 @@
                 <table class="w-full text-sm">
                     <thead>
                         <tr class="bg-sky-50 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
-                            <th class="p-2 px-3 text-left">Date</th>
+                            <th class="p-2 px-3 text-left">Arrival Date</th>
                             <th class="p-2 px-3 text-left">Name / Group</th>
                             <th class="p-2 px-3 text-left">PAX</th>
                             <th class="p-2 px-3 text-left">Hotel</th>

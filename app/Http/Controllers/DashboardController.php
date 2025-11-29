@@ -12,127 +12,115 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // 👉 1. YOUR EXISTING DASHBOARD STATS
-        // Move whatever logic you currently use (for quota, arrivals, etc.)
-        // from your /dashboard route into here.
+        // dd('DashboardController is running');
 
-        // Example only – adjust if your code is different:
-        $today = Carbon::today();
+        $today        = Carbon::today();
+        $startOfWeek  = Carbon::now()->startOfWeek();
+        $endOfWeek    = Carbon::now()->endOfWeek();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth   = Carbon::now()->endOfMonth();
 
-        // Today's arrivals
+        // --- Arrivals ---
         $todaysArrivals = Schedule::with('invoice')
             ->whereDate('arrival_date', $today)
             ->orderBy('arrival_date')
             ->get();
 
-        // Week arrivals
         $weeksArrivals = Schedule::with('invoice')
-            ->whereBetween('arrival_date', [
-                $today->copy()->startOfWeek(),
-                $today->copy()->endOfWeek(),
-            ])
+            ->whereBetween('arrival_date', [$startOfWeek, $endOfWeek])
             ->orderBy('arrival_date')
             ->get();
 
-        // Month arrivals
         $monthsArrivals = Schedule::with('invoice')
-            ->whereBetween('arrival_date', [
-                $today->copy()->startOfMonth(),
-                $today->copy()->endOfMonth(),
-            ])
+            ->whereBetween('arrival_date', [$startOfMonth, $endOfMonth])
             ->orderBy('arrival_date')
             ->get();
 
-        // Example quota logic – use your real values here:
-        $monthlyQuota        = 30;
-        $closedPaxThisMonth  = $monthsArrivals->sum('number_of_pax');
-        $quotaRemaining      = max(0, $monthlyQuota - $closedPaxThisMonth);
-        $quotaReached        = $quotaRemaining <= 0;
+        // --- Quota ---
+        $monthlyQuota = 20;
 
-        // 👉 2. EXISTING CHART DATA (sent vs paid, status)
-        // (Assuming you already have these somewhere – keep your versions,
-        // or use these as a base.)
+        $closedPaxThisMonth = Invoice::whereBetween('arrival_date', [$startOfMonth, $endOfMonth])
+            ->whereIn('status', ['confirmed', 'paid'])
+            ->sum('number_of_pax');
 
-        // Last 6 months for invoices sent/paid
-        $monthsBack = 5;
-        $from = Carbon::now()->startOfMonth()->subMonths($monthsBack);
+        $quotaRemaining = max($monthlyQuota - $closedPaxThisMonth, 0);
+        $quotaReached   = $closedPaxThisMonth >= $monthlyQuota;
 
-        $byMonth = Invoice::selectRaw('
-                DATE_FORMAT(date_issued, "%Y-%m") as ym,
-                COUNT(*) as sent_count,
-                SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid_count
-            ')
-            ->whereDate('date_issued', '>=', $from)
+        // --- Invoices by month (sent vs paid) ---
+        $monthsBack   = 5;
+        $startPeriod  = Carbon::now()->copy()->subMonths($monthsBack)->startOfMonth();
+        $endPeriod    = Carbon::now()->copy()->endOfMonth();
+
+        $stats = Invoice::selectRaw('DATE_FORMAT(date_issued, "%Y-%m") as ym')
+            ->selectRaw('COUNT(*) as total_sent')
+            ->selectRaw('SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as total_paid')
+            ->whereBetween('date_issued', [$startPeriod, $endPeriod])
             ->groupBy('ym')
             ->orderBy('ym')
             ->get();
-
-        $period = CarbonPeriod::create(
-            $from,
-            '1 month',
-            Carbon::now()->startOfMonth()
-        );
 
         $invoicesByMonthLabels = [];
         $invoicesByMonthSent   = [];
         $invoicesByMonthPaid   = [];
 
-        foreach ($period as $month) {
-            $ym  = $month->format('Y-m');
-            $row = $byMonth->firstWhere('ym', $ym);
+        $cursor = $startPeriod->copy();
+        while ($cursor <= $endPeriod) {
+            $key   = $cursor->format('Y-m');
+            $label = $cursor->format('M Y');
+            $row   = $stats->firstWhere('ym', $key);
 
-            $invoicesByMonthLabels[] = $month->format('M Y');
-            $invoicesByMonthSent[]   = $row ? (int) $row->sent_count : 0;
-            $invoicesByMonthPaid[]   = $row ? (int) $row->paid_count : 0;
+            $invoicesByMonthLabels[] = $label;
+            $invoicesByMonthSent[]   = $row ? (int) $row->total_sent : 0;
+            $invoicesByMonthPaid[]   = $row ? (int) $row->total_paid : 0;
+
+            $cursor->addMonth();
         }
 
-        // Status breakdown THIS month
-        $statusPaid      = Invoice::where('status', 'paid')
-            ->whereBetween('date_issued', [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()])
-            ->count();
+        // --- Status breakdown this month ---
+        $statusCounts = Invoice::whereBetween('date_issued', [$startOfMonth, $endOfMonth])
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
-        $statusPending   = Invoice::where('status', 'pending')
-            ->whereBetween('date_issued', [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()])
-            ->count();
+        $statusPaid      = (int) ($statusCounts['paid'] ?? 0);
+        $statusPending   = (int) ($statusCounts['pending'] ?? 0);
+        $statusCancelled = (int) ($statusCounts['cancelled'] ?? 0);
+        $statusConfirmed = (int) ($statusCounts['confirmed'] ?? 0);
 
-        $statusCancelled = Invoice::where('status', 'cancelled')
-            ->whereBetween('date_issued', [$today->copy()->startOfMonth(), $today->copy()->endOfMonth()])
-            ->count();
-
-        // 👉 3. NEW: Monthly income (admin only)
+        // --- NEW: Monthly income (paid invoices only) ---
         $monthlyIncomeLabels    = [];
         $monthlyIncomeCollected = [];
         $monthlyIncomeRemaining = [];
 
-        if (Auth::user()->is_admin) {
-            $fromIncome = Carbon::now()->startOfMonth()->subMonths($monthsBack);
+        $fromIncome = Carbon::now()->copy()->subMonths($monthsBack)->startOfMonth();
 
-            $paidByMonth = Invoice::selectRaw('
-                    DATE_FORMAT(date_issued, "%Y-%m") as ym,
-                    SUM(downpayment) as collected,
-                    SUM(balance) as remaining
-                ')
-                ->where('status', 'paid')
-                ->whereDate('date_issued', '>=', $fromIncome)
-                ->groupBy('ym')
-                ->orderBy('ym')
-                ->get();
+        $paidByMonth = Invoice::selectRaw('
+                DATE_FORMAT(date_issued, "%Y-%m") as ym,
+                SUM(downpayment) as collected,
+                SUM(balance) as remaining
+            ')
+            ->where('status', 'paid')
+            ->whereDate('date_issued', '>=', $fromIncome)
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get();
 
-            $incomePeriod = CarbonPeriod::create(
-                $fromIncome,
-                '1 month',
-                Carbon::now()->startOfMonth()
-            );
+        $incomePeriod = CarbonPeriod::create(
+            $fromIncome,
+            '1 month',
+            Carbon::now()->startOfMonth()
+        );
 
-            foreach ($incomePeriod as $month) {
-                $ym  = $month->format('Y-m');
-                $row = $paidByMonth->firstWhere('ym', $ym);
+        foreach ($incomePeriod as $month) {
+            $ym  = $month->format('Y-m');
+            $row = $paidByMonth->firstWhere('ym', $ym);
 
-                $monthlyIncomeLabels[]    = $month->format('M Y');
-                $monthlyIncomeCollected[] = $row ? (float) $row->collected : 0;
-                $monthlyIncomeRemaining[] = $row ? (float) $row->remaining : 0;
-            }
+            $monthlyIncomeLabels[]    = $month->format('M Y');
+            $monthlyIncomeCollected[] = $row ? (float) $row->collected : 0;
+            $monthlyIncomeRemaining[] = $row ? (float) $row->remaining : 0;
         }
+
+        $authUser = Auth::user();
 
         return view('dashboard', [
             // arrivals
@@ -155,11 +143,15 @@ class DashboardController extends Controller
             'statusPaid'      => $statusPaid,
             'statusPending'   => $statusPending,
             'statusCancelled' => $statusCancelled,
+            'statusConfirmed' => $statusConfirmed,
 
             // NEW: income chart
             'monthlyIncomeLabels'    => $monthlyIncomeLabels,
             'monthlyIncomeCollected' => $monthlyIncomeCollected,
             'monthlyIncomeRemaining' => $monthlyIncomeRemaining,
+
+            // current user (for Blade checks)
+            'authUser' => $authUser,
         ]);
     }
 }
