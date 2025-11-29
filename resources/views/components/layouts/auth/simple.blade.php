@@ -21,8 +21,8 @@
                 {{-- BIG LOGO --}}
                 <div class="flex flex-col items-center">
                     <img
-                        src="{{ asset('images/logo.png') }}"
-                        class="h-60 w-auto mb-4 drop-shadow-xl"
+                        src="{{ asset('images/logo_login.png') }}"
+                        class="h-50 w-auto mb-4 drop-shadow-xl rounded-full"
                         alt="Northern Island Logo"
                     >
                 </div>

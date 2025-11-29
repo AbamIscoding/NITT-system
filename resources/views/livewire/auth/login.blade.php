@@ -3,13 +3,6 @@
 
         {{-- Brand + Title --}}
         <div class="space-y-2 text-center">
-            {{-- already added in the simple.blade.php
-            div class="flex justify-center">
-                <img src="{{ asset('images/logo.png') }}"
-                    alt="Northern Island Logo"
-                    class="h-40 w-auto rounded-lg shadow-sm">
-            </div> --}}
-
             <div>
                 <h1 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
                     Northern Island Staff Login
