@@ -39,7 +39,7 @@ class InvoiceController extends Controller
             'downpayment'         => ['nullable', 'numeric', 'min:0'],
             'arrival_date'        => ['required', 'date'],
             'departure_date'      => ['required', 'date', 'after_or_equal:arrival_date'],
-            'due_date'            => ['nullable', 'date'],
+            'due_date'            => ['required', 'date',],
         ]);
 
         // calculate totals
@@ -86,7 +86,7 @@ class InvoiceController extends Controller
 
             'arrival_date'        => $validated['arrival_date'],
             'departure_date'      => $validated['departure_date'],
-            'due_date'            => $validated['due_date'] ?? null,
+            'due_date'            => $validated['due_date'],
             'date_issued'         => now()->toDateString(),
         ]);
 
