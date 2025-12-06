@@ -37,7 +37,7 @@ class DashboardController extends Controller
             ->get();
 
         // --- Quota ---
-        $monthlyQuota = 30;
+        $monthlyQuota = 35;
 
         $closedPaxThisMonth = Invoice::whereBetween('date_issued', [$startOfMonth, $endOfMonth])
             ->whereIn('status', ['confirmed', 'paid'])   // treat these as “closed”
@@ -85,7 +85,6 @@ class DashboardController extends Controller
         $statusPaid      = (int) ($statusCounts['paid'] ?? 0);
         $statusPending   = (int) ($statusCounts['pending'] ?? 0);
         $statusCancelled = (int) ($statusCounts['cancelled'] ?? 0);
-        $statusConfirmed = (int) ($statusCounts['confirmed'] ?? 0);
 
         // --- NEW: Monthly income (paid invoices only) ---
         $monthlyIncomeLabels    = [];
@@ -143,7 +142,6 @@ class DashboardController extends Controller
             'statusPaid'      => $statusPaid,
             'statusPending'   => $statusPending,
             'statusCancelled' => $statusCancelled,
-            'statusConfirmed' => $statusConfirmed,
 
             // NEW: income chart
             'monthlyIncomeLabels'    => $monthlyIncomeLabels,

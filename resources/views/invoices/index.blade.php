@@ -23,8 +23,8 @@
         {{-- Search / Filters --}}
         <div class="mb-5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/80 shadow-sm p-4">
             <form method="GET"
-                  action="{{ route('invoices.index') }}"
-                  class="flex flex-wrap gap-3 items-end">
+                action="{{ route('invoices.index') }}"
+                class="flex flex-wrap gap-3 items-end">
 
                 <div class="flex-1 min-w-[220px]">
                     <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
@@ -35,29 +35,45 @@
                         name="search"
                         value="{{ $search ?? '' }}"
                         class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm
-                               text-slate-900 placeholder:text-slate-400
-                               focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400
-                               dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100"
+                            text-slate-900 placeholder:text-slate-400
+                            focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400
+                            dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100"
                         placeholder="Search keyword..."
+                    >
+                </div>
+
+                {{-- NEW: Month filter --}}
+                <div class="min-w-[160px]">
+                    <label class="block text-[11px] font-semibold text-slate-600 dark:text-slate-300 mb-1">
+                        Sent in month (date issued)
+                    </label>
+                    <input
+                        type="month"
+                        name="month"
+                        value="{{ $month ?? request('month') }}"
+                        class="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm
+                            text-slate-900 focus:border-sky-400 focus:outline-none focus:ring-1 focus:ring-sky-400
+                            dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100"
                     >
                 </div>
 
                 <div class="flex gap-2">
                     <button type="submit"
                             class="inline-flex items-center justify-center rounded-lg bg-sky-600 px-4 py-2 text-sm font-medium text-white
-                                   hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
+                                hover:bg-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400">
                         Search
                     </button>
 
                     <a href="{{ route('invoices.index') }}"
-                       class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm
-                              text-slate-700 hover:bg-slate-50
-                              dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800">
+                    class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm
+                            text-slate-700 hover:bg-slate-50
+                            dark:bg-slate-900 dark:border-slate-700 dark:text-slate-100 dark:hover:bg-slate-800">
                         Clear
                     </a>
                 </div>
             </form>
         </div>
+
 
         {{-- Table --}}
         <div class="border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-900/80 shadow-sm overflow-hidden">

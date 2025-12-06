@@ -9,6 +9,7 @@ use App\Models\Schedule;
 use Illuminate\Http\Request;
 use App\Mail\InvoiceMail;
 use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 
 
 class InvoiceController extends Controller
@@ -121,6 +122,7 @@ class InvoiceController extends Controller
 
         $search = $request->input('search');
         $pax = $request->input('pax');
+        $month  = $request->input('month');
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -129,6 +131,28 @@ class InvoiceController extends Controller
                 ->orWhere('tour_package', 'like', '%' . $search . '%');
             });
         }
+         // NEW: filter by date_issued month
+        if ($month) {
+            try {
+                $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+                $end   = $start->copy()->endOfMonth();
+
+                $query->whereBetween('date_issued', [$start, $end]);
+            } catch (\Exception $e) {
+                // if month format is wrong, just ignore the filter
+            }
+        }
+
+        $invoices = $query
+            ->orderBy('date_issued', 'desc')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('invoices.index', [
+            'invoices' => $invoices,
+            'search'   => $search,
+            'month'    => $month,
+        ]);
 
         if ($pax !== null && $pax !== '') {
             $query->where('number_of_pax', $pax);
