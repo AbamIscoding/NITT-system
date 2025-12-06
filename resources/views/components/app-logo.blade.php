@@ -1,6 +1,5 @@
-
-<div class="ms-1 grid flex-1 text-start mt-5 text-sm">
-    <span class="mb-0.5 truncate leading-tight font-semibold">Northern Island Travel & Tours</span>
+<div class="w-full flex justify-center mt-1 mb-4">
+    <img src="{{ asset('images/logo.png') }}"
+         alt="Northern Island Travel & Tours Logo"
+         class="h-40 w-auto object-contain">
 </div>
-
-
