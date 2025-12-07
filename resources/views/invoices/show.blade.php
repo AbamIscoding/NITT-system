@@ -1,6 +1,9 @@
 <x-layouts.app>
     <div class="max-w-3xl mx-auto py-8">
-        <h1 class="text-2xl font-bold mb-4">Invoice #{{ $invoice->id }}</h1>
+        <a href="{{ route('invoices.index') }}" class="mt-4 inline-block text-blue-600 underline">
+            ← Back to invoices
+        </a>
+        <h1 class="text-2xl font-bold mb-4 mt-5">Invoice #{{ $invoice->id }}</h1>
 
         <div class="mb-6 space-y-1 text-m">
             <p><strong>Lead Guest: </strong> {{ $invoice->lead_guest_name }}</p>
@@ -150,8 +153,6 @@
                 </div>
             @endif
 
-        <a href="{{ route('invoices.index') }}" class="mt-4 inline-block text-blue-600 underline">
-            ← Back to invoices
-        </a>
+
     </div>
 </x-layouts.app>

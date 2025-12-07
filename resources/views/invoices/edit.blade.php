@@ -1,6 +1,9 @@
 <x-layouts.app>
     <div class="max-w-3xl mx-auto py-8">
-        <h1 class="text-2xl font-bold mb-6">Edit Invoice</h1>
+        <a href="{{ route('invoices.index') }}" class="mt-4 inline-block text-blue-600 underline">
+            ← Back to invoices
+        </a>
+        <h1 class="text-2xl font-bold mb-6 mt-5">Edit Invoice</h1>
 
         @if(session('success'))
             <div class="mb-4 p-3 bg-green-100 border border-green-300 rounded">
