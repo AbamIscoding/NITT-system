@@ -1,20 +1,18 @@
 <p>Dear {{ $invoice->lead_guest_name }},</p>
 
-<p>Thank you for booking with Northern Island Travel & Tours.</p>
+<p>Thank you for choosing Northern Island Travel & Tours for your upcoming Batanes Trip.</p>
 
 <p>
-    Please find your invoice attached as a PDF.<br>
-    Tour Package: {{ $invoice->tour_package }}<br>
-    Total Amount: ₱{{ number_format($invoice->total_amount, 2) }}<br>
-    Balance: ₱{{ number_format($invoice->balance, 2) }}
+    We are excited to set you off on one of the best trips of your life. Get ready to create some unforgettable memories,
+    mesmerized with picturesque views and being exposed to Ivatan culture. <br>
+
+    I hereby attached the invoice. Also please confirm that all information included is correct.
 </p>
 
-<p>
-    Arrival: {{ $invoice->arrival_date }}<br>
-    Departure: {{ $invoice->departure_date }}
-</p>
-
+<br>
 <p>If you have any questions, feel free to reply to this email.</p>
 
 <p>Best regards,<br>
-Northern Island Travel & Tours</p>
+Northern Island Travel & Tours <br>
+San Vicente, Ivana, Batanes <br>
+0918-325-5597</p>
